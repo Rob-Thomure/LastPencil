@@ -1,15 +1,14 @@
-import java.util.Scanner;
 
 public class AppRunner {
-    private static final String JACK = "Jack";
-    private static final String JOHN = "John";
-    private final Scanner keyboard;
-    private String playersTurn;
+    private final Player playerJohn;
+    private final Player playerJack;
     private Pencils pencils;
+    private Player playerTurn;
 
 
     public AppRunner() {
-        this.keyboard = new Scanner(System.in);
+        this.playerJohn = new PlayerJohn();
+        this.playerJack = new PlayerJack();
     }
 
     public void execute() {
@@ -21,19 +20,19 @@ public class AppRunner {
         CommandLine commandLine = new CommandLine();
         int numPencils = commandLine.getNumPencilsToUse();
         this.pencils = new Pencils(numPencils);
-        playersTurn = commandLine.whoIsFirst();
+        String firstPlayer = commandLine.whoIsFirst();
+        initializePlayerTurn(firstPlayer);
+    }
+
+    private void initializePlayerTurn(String name) {
+        playerTurn = name.equals("John") ? playerJohn : playerJack;
     }
 
     private void takeTurnsRemovingPencils() {
-        CommandLine commandLine = new CommandLine();
         while (!pencils.isGameOver()) {
             System.out.println(pencils);
             printPlayersTurn();
-            int numPencilsToTake = commandLine.numPencilsToTake();
-            while (pencils.takePencils(numPencilsToTake) == false) {
-                System.out.println("Too many pencils were taken");
-                numPencilsToTake = commandLine.numPencilsToTake();
-            }
+            playerTurn.takeTurn(pencils);
             if (pencils.isGameOver()) {
                 printWinner();
             } else {
@@ -43,15 +42,15 @@ public class AppRunner {
     }
 
     private void printPlayersTurn() {
-        System.out.println(playersTurn + "'s turn!");
+        System.out.println(playerTurn.getPlayerName() + "'s turn!");
     }
 
     private void changePlayerTurn() {
-        playersTurn = playersTurn.equals(JACK) ? JOHN : JACK;
+        playerTurn = playerTurn.getPlayerName().equals("John") ? playerJack : playerJohn;
     }
 
     private void printWinner() {
-        String winner = playersTurn.equals("John") ? "Jack" : "John";
+        String winner = playerTurn.getPlayerName().equals("John") ? "Jack" : "John";
         System.out.println(winner + " won!");
     }
 
